@@ -64,18 +64,18 @@ public class DepthFirstOrder {
     private int postCounter;           // counter for postorder numbering
 
     /**
-     * Determines a depth-first order for the digraph {@code G}.
+     * Determines a depth-first order for the digraph {@code that}.
      *
-     * @param G the digraph
+     * @param that the digraph
      */
-    public DepthFirstOrder(Digraph G) {
-        pre = new int[G.getVertexNumber()];
-        post = new int[G.getVertexNumber()];
-        postorder = new ArrayDeque<>();
-        preorder = new ArrayDeque<>();
-        marked = new boolean[G.getVertexNumber()];
-        for (int v = 0; v < G.getVertexNumber(); v++)
-            if (!marked[v]) depthFirstSearch(G, v);
+    public DepthFirstOrder(Digraph that) {
+        this.pre = new int[that.getVertexNumber()];
+        this.post = new int[that.getVertexNumber()];
+        this.postorder = new ArrayDeque<>();
+        this.preorder = new ArrayDeque<>();
+        this.marked = new boolean[that.getVertexNumber()];
+        for (int v = 0; v < that.getVertexNumber(); v++)
+            if (!marked[v]) depthFirstSearch(that, v);
 
         assert check();
     }
@@ -106,7 +106,7 @@ public class DepthFirstOrder {
      * @throws IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
      */
     public int getPreorder(int v) {
-        validateVertex(v);
+        requireVertex(v);
         return pre[v];
     }
 
@@ -118,7 +118,7 @@ public class DepthFirstOrder {
      * @throws IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
      */
     public int getPostorder(int v) {
-        validateVertex(v);
+        requireVertex(v);
         return post[v];
     }
 
@@ -145,47 +145,20 @@ public class DepthFirstOrder {
      *
      * @return the vertices in reverse postorder, as an iterable of vertices
      */
-    public Iterable<Integer> reversePost() {
-        Stack<Integer> reverse = new Stack<Integer>();
+    public Iterable<Integer> getPostorderReversed() {
+        Stack<Integer> reverse = new Stack<>();
         for (int v : postorder)
             reverse.push(v);
         return reverse;
     }
 
 
-    // check that getPreorder() and getPostorder() are consistent with getPreorder(v) and getPostorder(v)
-    private boolean check() {
 
-        // check that getPostorder(v) is consistent with getPostorder()
-        int r = 0;
-        for (int v : getPostorder()) {
-            if (getPostorder(v) != r) {
-                System.out.println("getPostorder(v) and getPostorder() inconsistent");
-                return false;
-            }
-            r++;
-        }
-
-        // check that getPreorder(v) is consistent with getPreorder()
-        r = 0;
-        for (int v : getPreorder()) {
-            if (getPreorder(v) != r) {
-                System.out.println("getPreorder(v) and getPreorder() inconsistent");
-                return false;
-            }
-            r++;
-        }
-
-        return true;
+    private void requireVertex(int v) {
+        int vertexCount = marked.length;
+        if (v < 0 || v >= vertexCount)
+            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (vertexCount - 1));
     }
-
-    // throw an IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
-    private void validateVertex(int v) {
-        int V = marked.length;
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V - 1));
-    }
-
     /**
      * Unit tests the {@code DepthFirstOrder} data type.
      *
@@ -194,12 +167,12 @@ public class DepthFirstOrder {
     public static void main(String[] args) {
 
         //TODO check init
-        Digraph G = new Digraph(5);
+        Digraph graph = new Digraph(5);
 
-        DepthFirstOrder dfs = new DepthFirstOrder(G);
+        DepthFirstOrder dfs = new DepthFirstOrder(graph);
         System.out.println("   v  getPreorder getPostorder");
         System.out.println("--------------");
-        for (int v = 0; v < G.getVertexNumber(); v++) {
+        for (int v = 0; v < graph.getVertexNumber(); v++) {
             System.out.printf("%4d %4d %4d\n", v, dfs.getPreorder(v), dfs.getPostorder(v));
         }
 
@@ -216,12 +189,40 @@ public class DepthFirstOrder {
         System.out.println();
 
         System.out.print("Reverse postorder: ");
-        for (int v : dfs.reversePost()) {
+        for (int v : dfs.getPostorderReversed()) {
             System.out.print(v + " ");
         }
         System.out.println();
 
 
+    }
+
+    // TEST
+    // check that getPreorder() and getPostorder() are consistent with getPreorder(v) and getPostorder(v)
+    // throw an IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
+    private boolean check() {
+
+        // check that getPostorder(v) is consistent with getPostorder()
+        int r = 0;
+        for (int vertex : getPostorder()) {
+            if (getPostorder(vertex) != r) {
+                System.out.println("getPostorder(vertex) and getPostorder() inconsistent");
+                return false;
+            }
+            r++;
+        }
+
+        // check that getPreorder(v) is consistent with getPreorder()
+        r = 0;
+        for (int v : getPreorder()) {
+            if (getPreorder(v) != r) {
+                System.out.println("getPreorder(v) and getPreorder() inconsistent");
+                return false;
+            }
+            r++;
+        }
+
+        return true;
     }
 
 }

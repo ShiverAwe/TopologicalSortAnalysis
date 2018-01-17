@@ -68,7 +68,7 @@ public class Topological {
         DirectedCycle finder = new DirectedCycle(G);
         if (!finder.hasCycle()) {
             DepthFirstOrder dfs = new DepthFirstOrder(G);
-            order = dfs.reversePost();
+            order = dfs.getPostorderReversed();
             rank = new int[G.getVertexNumber()];
             int i = 0;
             for (int v : order)
