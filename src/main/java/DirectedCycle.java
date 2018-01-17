@@ -8,7 +8,7 @@ import java.util.Stack;
  *                https://algs4.cs.princeton.edu/42digraph/tinyDAG.txt
  *
  *  Finds a directed cycle in a digraph.
- *  Runs in O(E + V) time.
+ *  Runs in O(getEdgesNumber + getVertexNumber) time.
  *
  *  % java DirectedCycle tinyDG.txt
  *  Directed cycle: 3 5 4 3
@@ -26,9 +26,9 @@ import java.util.Stack;
  * returns one.
  * <p>
  * This implementation uses depth-first search.
- * The constructor takes time proportional to <em>V</em> + <em>E</em>
+ * The constructor takes time proportional to <em>getVertexNumber</em> + <em>getEdgesNumber</em>
  * (in the worst case),
- * where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
+ * where <em>getVertexNumber</em> is the number of vertices and <em>getEdgesNumber</em> is the number of edges.
  * Afterwards, the <em>hasCycle</em> operation takes constant time;
  * the <em>cycle</em> operation takes time proportional
  * to the length of the cycle.
@@ -50,46 +50,47 @@ public class DirectedCycle {
     private Stack<Integer> cycle;    // directed cycle (or null if no such cycle)
 
     /**
-     * Determines whether the digraph {@code G} has a directed cycle and, if so,
+     * Determines whether the digraph {@code graph} has a directed cycle and, if so,
      * finds such a cycle.
      *
-     * @param G the digraph
+     * @param graph the digraph
      */
-    public DirectedCycle(Digraph G) {
-        marked = new boolean[G.V()];
-        onStack = new boolean[G.V()];
-        edgeTo = new int[G.V()];
-        for (int v = 0; v < G.V(); v++)
-            if (!marked[v] && cycle == null) dfs(G, v);
+    public DirectedCycle(Digraph graph) {
+        marked = new boolean[graph.getVertexNumber()];
+        onStack = new boolean[graph.getVertexNumber()];
+        edgeTo = new int[graph.getVertexNumber()];
+
+        for (int vertex = 0; vertex < graph.getVertexNumber(); vertex++)
+            if (!marked[vertex] && cycle == null) depthFirstSearch(graph, vertex);
     }
 
     // check that algorithm computes either the topological order or finds a directed cycle
-    private void dfs(Digraph G, int v) {
-        onStack[v] = true;
-        marked[v] = true;
-        for (int w : G.adj(v)) {
+    private void depthFirstSearch(Digraph graph, int vertex) {
+        onStack[vertex] = true;
+        marked[vertex] = true;
+        for (int w : graph.getAdjacency(vertex)) {
 
             // short circuit if directed cycle found
             if (cycle != null) return;
 
                 // found new vertex, so recur
             else if (!marked[w]) {
-                edgeTo[w] = v;
-                dfs(G, w);
+                edgeTo[w] = vertex;
+                depthFirstSearch(graph, w);
             }
 
             // trace back directed cycle
             else if (onStack[w]) {
-                cycle = new Stack<Integer>();
-                for (int x = v; x != w; x = edgeTo[x]) {
+                cycle = new Stack<>();
+                for (int x = vertex; x != w; x = edgeTo[x]) {
                     cycle.push(x);
                 }
                 cycle.push(w);
-                cycle.push(v);
+                cycle.push(vertex);
                 assert check();
             }
         }
-        onStack[v] = false;
+        onStack[vertex] = false;
     }
 
     /**
@@ -139,13 +140,13 @@ public class DirectedCycle {
      */
     public static void main(String[] args) {
         //TODO to init and test
-        Digraph G = new Digraph(5);
+        Digraph graph = new Digraph(5);
 
-        DirectedCycle finder = new DirectedCycle(G);
+        DirectedCycle finder = new DirectedCycle(graph);
         if (finder.hasCycle()) {
             System.out.print("Directed cycle: ");
-            for (int v : finder.cycle()) {
-                System.out.print(v + " ");
+            for (int vertex : finder.cycle()) {
+                System.out.print(vertex + " ");
             }
             System.out.println();
         } else {
@@ -153,7 +154,6 @@ public class DirectedCycle {
         }
         System.out.println();
     }
-
 }
 
 //acknowledgments: Robert Sedgewick and Kevin Wayne.

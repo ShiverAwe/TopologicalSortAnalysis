@@ -7,10 +7,10 @@
  *                https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
  *
  *  Compute preorder and postorder for a digraph or edge-weighted digraph.
- *  Runs in O(E + V) time.
+ *  Runs in O(getEdgesNumber + getVertexNumber) time.
  *
  *  % java DepthFirstOrder tinyDAG.txt
- *     v  pre post
+ *     v  getPreorder getPostorder
  *  --------------
  *     0    0    8
  *     1    3    2
@@ -41,11 +41,11 @@ import java.util.Stack;
  * or edge-weighted digraph, including preorder, postorder, and reverse postorder.
  * <p>
  * This implementation uses depth-first search.
- * The constructor takes time proportional to <em>V</em> + <em>E</em>
+ * The constructor takes time proportional to <em>getVertexNumber</em> + <em>getEdgesNumber</em>
  * (in the worst case),
- * where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
+ * where <em>getVertexNumber</em> is the number of vertices and <em>getEdgesNumber</em> is the number of edges.
  * Afterwards, the <em>preorder</em>, <em>postorder</em>, and <em>reverse postorder</em>
- * operation takes take time proportional to <em>V</em>.
+ * operation takes take time proportional to <em>getVertexNumber</em>.
  * <p>
  * For additional documentation,
  * see <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
@@ -56,8 +56,8 @@ import java.util.Stack;
  */
 public class DepthFirstOrder {
     private boolean[] marked;          // marked[v] = has v been marked in dfs?
-    private int[] pre;                 // pre[v]    = preorder  number of v
-    private int[] post;                // post[v]   = postorder number of v
+    private int[] pre;                 // getPreorder[v]    = preorder  number of v
+    private int[] post;                // getPostorder[v]   = postorder number of v
     private Queue<Integer> preorder;   // vertices in preorder
     private Queue<Integer> postorder;  // vertices in postorder
     private int preCounter;            // counter or preorder numbering
@@ -69,31 +69,31 @@ public class DepthFirstOrder {
      * @param G the digraph
      */
     public DepthFirstOrder(Digraph G) {
-        pre = new int[G.V()];
-        post = new int[G.V()];
+        pre = new int[G.getVertexNumber()];
+        post = new int[G.getVertexNumber()];
         postorder = new ArrayDeque<>();
         preorder = new ArrayDeque<>();
-        marked = new boolean[G.V()];
-        for (int v = 0; v < G.V(); v++)
-            if (!marked[v]) dfs(G, v);
+        marked = new boolean[G.getVertexNumber()];
+        for (int v = 0; v < G.getVertexNumber(); v++)
+            if (!marked[v]) depthFirstSearch(G, v);
 
         assert check();
     }
 
 
     // run DFS in digraph G from vertex v and compute preorder/postorder
-    private void dfs(Digraph G, int v) {
+    private void depthFirstSearch(Digraph G, int v) {
         marked[v] = true;
         pre[v] = preCounter++;
         //TODO to analyze
-        preorder.enqueue(v);
-        for (int w : G.adj(v)) {
+        preorder.add(v);
+        for (int w : G.getAdjacency(v)) {
             if (!marked[w]) {
-                dfs(G, w);
+                depthFirstSearch(G, w);
             }
         }
         //TODO to analyze
-        postorder.enqueue(v);
+        postorder.add(v);
         post[v] = postCounter++;
     }
 
@@ -103,9 +103,9 @@ public class DepthFirstOrder {
      *
      * @param v the vertex
      * @return the preorder number of vertex {@code v}
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
      */
-    public int pre(int v) {
+    public int getPreorder(int v) {
         validateVertex(v);
         return pre[v];
     }
@@ -115,9 +115,9 @@ public class DepthFirstOrder {
      *
      * @param v the vertex
      * @return the postorder number of vertex {@code v}
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
      */
-    public int post(int v) {
+    public int getPostorder(int v) {
         validateVertex(v);
         return post[v];
     }
@@ -127,7 +127,7 @@ public class DepthFirstOrder {
      *
      * @return the vertices in postorder, as an iterable of vertices
      */
-    public Iterable<Integer> post() {
+    public Iterable<Integer> getPostorder() {
         return postorder;
     }
 
@@ -136,7 +136,7 @@ public class DepthFirstOrder {
      *
      * @return the vertices in preorder, as an iterable of vertices
      */
-    public Iterable<Integer> pre() {
+    public Iterable<Integer> getPreorder() {
         return preorder;
     }
 
@@ -153,24 +153,24 @@ public class DepthFirstOrder {
     }
 
 
-    // check that pre() and post() are consistent with pre(v) and post(v)
+    // check that getPreorder() and getPostorder() are consistent with getPreorder(v) and getPostorder(v)
     private boolean check() {
 
-        // check that post(v) is consistent with post()
+        // check that getPostorder(v) is consistent with getPostorder()
         int r = 0;
-        for (int v : post()) {
-            if (post(v) != r) {
-                System.out.println("post(v) and post() inconsistent");
+        for (int v : getPostorder()) {
+            if (getPostorder(v) != r) {
+                System.out.println("getPostorder(v) and getPostorder() inconsistent");
                 return false;
             }
             r++;
         }
 
-        // check that pre(v) is consistent with pre()
+        // check that getPreorder(v) is consistent with getPreorder()
         r = 0;
-        for (int v : pre()) {
-            if (pre(v) != r) {
-                System.out.println("pre(v) and pre() inconsistent");
+        for (int v : getPreorder()) {
+            if (getPreorder(v) != r) {
+                System.out.println("getPreorder(v) and getPreorder() inconsistent");
                 return false;
             }
             r++;
@@ -179,7 +179,7 @@ public class DepthFirstOrder {
         return true;
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
+    // throw an IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
     private void validateVertex(int v) {
         int V = marked.length;
         if (v < 0 || v >= V)
@@ -197,20 +197,20 @@ public class DepthFirstOrder {
         Digraph G = new Digraph(5);
 
         DepthFirstOrder dfs = new DepthFirstOrder(G);
-        System.out.println("   v  pre post");
+        System.out.println("   v  getPreorder getPostorder");
         System.out.println("--------------");
-        for (int v = 0; v < G.V(); v++) {
-            System.out.printf("%4d %4d %4d\n", v, dfs.pre(v), dfs.post(v));
+        for (int v = 0; v < G.getVertexNumber(); v++) {
+            System.out.printf("%4d %4d %4d\n", v, dfs.getPreorder(v), dfs.getPostorder(v));
         }
 
         System.out.print("Preorder:  ");
-        for (int v : dfs.pre()) {
+        for (int v : dfs.getPreorder()) {
             System.out.print(v + " ");
         }
         System.out.println();
 
         System.out.print("Postorder: ");
-        for (int v : dfs.post()) {
+        for (int v : dfs.getPostorder()) {
             System.out.print(v + " ");
         }
         System.out.println();

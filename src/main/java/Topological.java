@@ -7,7 +7,7 @@
  *  Data files:   https://algs4.cs.princeton.edu/42digraph/jobs.txt
  *
  *  Compute topological ordering of a DAG or edge-weighted DAG.
- *  Runs in O(E + V) time.
+ *  Runs in O(getEdgesNumber + getVertexNumber) time.
  *
  *  % java Topological jobs.txt "/"
  *  Calculus
@@ -35,11 +35,11 @@
  * returns one.
  * <p>
  * This implementation uses depth-first search.
- * The constructor takes time proportional to <em>V</em> + <em>E</em>
+ * The constructor takes time proportional to <em>getVertexNumber</em> + <em>getEdgesNumber</em>
  * (in the worst case),
- * where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
+ * where <em>getVertexNumber</em> is the number of vertices and <em>getEdgesNumber</em> is the number of edges.
  * Afterwards, the <em>hasOrder</em> and <em>rank</em> operations takes constant time;
- * the <em>order</em> operation takes time proportional to <em>V</em>.
+ * the <em>order</em> operation takes time proportional to <em>getVertexNumber</em>.
  * <p>
  * See {@link DirectedCycle}, { DirectedCycleX}, and
  * {@link } to compute a
@@ -69,7 +69,7 @@ public class Topological {
         if (!finder.hasCycle()) {
             DepthFirstOrder dfs = new DepthFirstOrder(G);
             order = dfs.reversePost();
-            rank = new int[G.V()];
+            rank = new int[G.getVertexNumber()];
             int i = 0;
             for (int v : order)
                 rank[v] = i++;
@@ -117,7 +117,7 @@ public class Topological {
      * @param v the vertex
      * @return the position of vertex {@code v} in a topological order
      * of the digraph; -1 if the digraph is not a DAG
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
      */
     public int rank(int v) {
         validateVertex(v);
@@ -125,7 +125,7 @@ public class Topological {
         else return -1;
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
+    // throw an IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
     private void validateVertex(int v) {
         int V = rank.length;
         if (v < 0 || v >= V)

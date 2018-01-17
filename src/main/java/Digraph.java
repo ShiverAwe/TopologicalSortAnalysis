@@ -27,12 +27,12 @@
  *
  ******************************************************************************/
 
-import java.util.NoSuchElementException;
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
  * The {@code Digraph} class represents a directed graph of vertices
- * named 0 through <em>V</em> - 1.
+ * named 0 through <em>vertexNumber</em> - 1.
  * It supports the following two primary operations: add an edge to the digraph,
  * iterate over all of the vertices adjacent from a given vertex.
  * Parallel edges and self-loops are permitted.
@@ -54,48 +54,48 @@ import java.util.Stack;
 public class Digraph {
     private static final String NEWLINE = System.getProperty("line.separator");
 
-    private final int V;           // number of vertices in this digraph
-    private int E;                 // number of edges in this digraph
-    private Bag<Integer>[] adj;    // adj[v] = adjacency list for vertex v
+    private final int vertexNumber;           // number of vertices in this digraph
+    private int edgesNumber;                 // number of edges in this digraph
+    private ArrayList<Integer>[] adjacency;    // adjacency[v] = adjacency list for vertex v // RU: list smejnosti
     private int[] indegree;        // indegree[v] = indegree of vertex v
 
     /**
-     * Initializes an empty digraph with <em>V</em> vertices.
+     * Initializes an empty digraph with <em>vertexNumber</em> vertices.
      *
-     * @param V the number of vertices
-     * @throws IllegalArgumentException if {@code V < 0}
+     * @param vertexNumber the number of vertices
+     * @throws IllegalArgumentException if {@code vertexNumber < 0}
      */
-    public Digraph(int V) {
-        if (V < 0) throw new IllegalArgumentException("Number of vertices in a Digraph must be nonnegative");
-        this.V = V;
-        this.E = 0;
-        indegree = new int[V];
+    public Digraph(int vertexNumber) {
+        if (vertexNumber < 0) throw new IllegalArgumentException("Number of vertices in a Digraph must be nonnegative");
+        this.vertexNumber = vertexNumber;
+        this.edgesNumber = 0;
+        indegree = new int[vertexNumber];
         //TODO to analyze and swap
-        adj = (Bag<Integer>[]) new Bag[V];
-        for (int v = 0; v < V; v++) {
-            adj[v] = new Bag<Integer>();
+        adjacency = (ArrayList<Integer>[]) new ArrayList[vertexNumber];
+        for (int v = 0; v < vertexNumber; v++) {
+            adjacency[v] = new ArrayList<>();
         }
     }
 
     /**
      * Initializes a new digraph that is a deep copy of the specified digraph.
      *
-     * @param G the digraph to copy
+     * @param that the digraph to copy
      */
-    public Digraph(Digraph G) {
-        this(G.V());
-        this.E = G.E();
-        for (int v = 0; v < V; v++)
-            this.indegree[v] = G.indegree(v);
-        for (int v = 0; v < G.V(); v++) {
+    public Digraph(Digraph that) {
+        this(that.getVertexNumber());
+        this.edgesNumber = that.getEdgesNumber();
+        for (int v = 0; v < vertexNumber; v++)
+            this.indegree[v] = that.indegree(v);
+        for (int v = 0; v < that.getVertexNumber(); v++) {
             // reverse so that adjacency list is in same order as original
-            Stack<Integer> reverse = new Stack<Integer>();
-            for (int w : G.adj[v]) {
+            Stack<Integer> reverse = new Stack<>();
+            for (int w : that.adjacency[v]) {
                 reverse.push(w);
             }
             for (int w : reverse) {
                 //TODO to analyze and swap
-                adj[v].add(w);
+                adjacency[v].add(w);
             }
         }
     }
@@ -105,8 +105,8 @@ public class Digraph {
      *
      * @return the number of vertices in this digraph
      */
-    public int V() {
-        return V;
+    public int getVertexNumber() {
+        return vertexNumber;
     }
 
     /**
@@ -114,15 +114,15 @@ public class Digraph {
      *
      * @return the number of edges in this digraph
      */
-    public int E() {
-        return E;
+    public int getEdgesNumber() {
+        return edgesNumber;
     }
 
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
-    private void validateVertex(int v) {
-        if (v < 0 || v >= V)
-            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V - 1));
+    // throw an IllegalArgumentException unless {@code 0 <= v < vertexNumber}
+    private void requireVertexExists(int v) {
+        if (v < 0 || v >= vertexNumber)
+            throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (vertexNumber - 1));
     }
 
     /**
@@ -130,14 +130,14 @@ public class Digraph {
      *
      * @param v the tail vertex
      * @param w the head vertex
-     * @throws IllegalArgumentException unless both {@code 0 <= v < V} and {@code 0 <= w < V}
+     * @throws IllegalArgumentException unless both {@code 0 <= v < vertexNumber} and {@code 0 <= w < vertexNumber}
      */
     public void addEdge(int v, int w) {
-        validateVertex(v);
-        validateVertex(w);
-        adj[v].add(w);
+        requireVertexExists(v);
+        requireVertexExists(w);
+        adjacency[v].add(w);
         indegree[w]++;
-        E++;
+        edgesNumber++;
     }
 
     /**
@@ -145,11 +145,11 @@ public class Digraph {
      *
      * @param v the vertex
      * @return the vertices adjacent from vertex {@code v} in this digraph, as an iterable
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < vertexNumber}
      */
-    public Iterable<Integer> adj(int v) {
-        validateVertex(v);
-        return adj[v];
+    public Iterable<Integer> getAdjacency(int v) {
+        requireVertexExists(v);
+        return adjacency[v];
     }
 
     /**
@@ -158,12 +158,12 @@ public class Digraph {
      *
      * @param v the vertex
      * @return the outdegree of vertex {@code v}
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < vertexNumber}
      */
     public int outdegree(int v) {
-        validateVertex(v);
+        requireVertexExists(v);
         //TODO to analyze and swap
-        return adj[v].size();
+        return adjacency[v].size();
     }
 
     /**
@@ -172,10 +172,10 @@ public class Digraph {
      *
      * @param v the vertex
      * @return the indegree of vertex {@code v}
-     * @throws IllegalArgumentException unless {@code 0 <= v < V}
+     * @throws IllegalArgumentException unless {@code 0 <= v < vertexNumber}
      */
     public int indegree(int v) {
-        validateVertex(v);
+        requireVertexExists(v);
         return indegree[v];
     }
 
@@ -185,9 +185,9 @@ public class Digraph {
      * @return the reverse of the digraph
      */
     public Digraph reverse() {
-        Digraph reverse = new Digraph(V);
-        for (int v = 0; v < V; v++) {
-            for (int w : adj(v)) {
+        Digraph reverse = new Digraph(vertexNumber);
+        for (int v = 0; v < vertexNumber; v++) {
+            for (int w : getAdjacency(v)) {
                 reverse.addEdge(w, v);
             }
         }
@@ -197,16 +197,16 @@ public class Digraph {
     /**
      * Returns a string representation of the graph.
      *
-     * @return the number of vertices <em>V</em>, followed by the number of edges <em>E</em>,
-     * followed by the <em>V</em> adjacency lists
+     * @return the number of vertices <em>vertexNumber</em>, followed by the number of edges <em>edgesNumber</em>,
+     * followed by the <em>vertexNumber</em> adjacency lists
      */
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append(V + " vertices, " + E + " edges " + NEWLINE);
-        for (int v = 0; v < V; v++) {
+        s.append(vertexNumber + " vertices, " + edgesNumber + " edges " + NEWLINE);
+        for (int v = 0; v < vertexNumber; v++) {
             s.append(String.format("%d: ", v));
             //TODO to analyze and swap
-            for (int w : adj[v]) {
+            for (int w : adjacency[v]) {
                 s.append(String.format("%d ", w));
             }
             s.append(NEWLINE);
