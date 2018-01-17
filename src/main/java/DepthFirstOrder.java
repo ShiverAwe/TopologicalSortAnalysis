@@ -76,8 +76,6 @@ public class DepthFirstOrder {
         this.marked = new boolean[that.getVertexNumber()];
         for (int v = 0; v < that.getVertexNumber(); v++)
             if (!marked[v]) depthFirstSearch(that, v);
-
-        assert check();
     }
 
 
@@ -195,34 +193,6 @@ public class DepthFirstOrder {
         System.out.println();
 
 
-    }
-
-    // TEST
-    // check that getPreorder() and getPostorder() are consistent with getPreorder(v) and getPostorder(v)
-    // throw an IllegalArgumentException unless {@code 0 <= v < getVertexNumber}
-    private boolean check() {
-
-        // check that getPostorder(v) is consistent with getPostorder()
-        int r = 0;
-        for (int vertex : getPostorder()) {
-            if (getPostorder(vertex) != r) {
-                System.out.println("getPostorder(vertex) and getPostorder() inconsistent");
-                return false;
-            }
-            r++;
-        }
-
-        // check that getPreorder(v) is consistent with getPreorder()
-        r = 0;
-        for (int v : getPreorder()) {
-            if (getPreorder(v) != r) {
-                System.out.println("getPreorder(v) and getPreorder() inconsistent");
-                return false;
-            }
-            r++;
-        }
-
-        return true;
     }
 
 }
